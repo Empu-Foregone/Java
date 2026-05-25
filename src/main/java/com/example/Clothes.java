@@ -2,40 +2,21 @@ package com.example;
 
 import java.util.Objects;
 
-/**
- * Клас, що представляє одяг.
- * Має поля: тип, розмір (enum), ціна, бренд, матеріал (enum).
- */
 public class Clothes {
-    private static int totalCreated = 0;
+    protected String type;
+    protected Size size;
+    protected double price;
+    protected String brand;
+    protected Material material;
 
-    private String type;
-    private Size size;
-    private double price;
-    private String brand;
-    private Material material;
-
-    /**
-     * Основний конструктор з валідацією.
-     * @param type тип одягу (не може бути порожнім)
-     * @param size розмір (не може бути null)
-     * @param price ціна (має бути > 0)
-     * @param brand бренд (не може бути порожнім)
-     * @param material матеріал (не може бути null)
-     */
     public Clothes(String type, Size size, double price, String brand, Material material) {
         setType(type);
         setSize(size);
         setPrice(price);
         setBrand(brand);
         setMaterial(material);
-        totalCreated++;
     }
 
-    /**
-     * Конструктор копіювання.
-     * @param other інший об'єкт Clothes
-     */
     public Clothes(Clothes other) {
         this(other.type, other.size, other.price, other.brand, other.material);
     }
@@ -45,8 +26,6 @@ public class Clothes {
     public double getPrice() { return price; }
     public String getBrand() { return brand; }
     public Material getMaterial() { return material; }
-
-    public static int getTotalCreated() { return totalCreated; }
 
     public void setType(String type) {
         if (type == null || type.trim().isEmpty()) {
@@ -85,8 +64,8 @@ public class Clothes {
 
     @Override
     public String toString() {
-        return String.format("Одяг: %s, бренд: %s, розмір: %s (%s), матеріал: %s, ціна: %.2f грн",
-                type, brand, size.name(), size.getDescription(), material.getUkrainianName(), price);
+        return String.format("[Одяг] %s, бренд: %s, розмір: %s, матеріал: %s, ціна: %.2f грн",
+                type, brand, size.name(), material.getUkrainianName(), price);
     }
 
     @Override

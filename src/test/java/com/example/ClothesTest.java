@@ -22,6 +22,19 @@ class ClothesTest {
     }
 
     @Test
+    void testFileSaveLoad() {
+    ArrayList<Clothes> original = new ArrayList<>();
+    original.add(new Clothes("Test", Size.M, 100, "Nike", Material.COTTON));
+    original.add(new Shirt("Polo", Size.L, 150, "Adidas", Material.COTTON, true, "класичний"));
+    
+    FileManager.saveToFile(original);
+    ArrayList<Clothes> loaded = FileManager.loadFromFile();
+    
+    assertEquals(original.size(), loaded.size());
+    assertEquals(original.get(0).getType(), loaded.get(0).getType());
+    }
+
+    @Test
     void testPolymorphismWithAllTypes() {
         Clothes c = new Clothes("Basic", Size.M, 100, "Nike", Material.COTTON);
         Shirt s = new Shirt("Polo", Size.L, 150, "Adidas", Material.COTTON, true, "класичний");

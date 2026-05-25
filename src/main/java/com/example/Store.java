@@ -92,6 +92,16 @@ public class Store {
         }
         return results;
     }
+   /**
+    * Повертає відсортований список усіх товарів (за типом одягу).
+    * @return відсортований ArrayList товарів
+    */
+    public ArrayList<StoreItem> getSortedItems() {
+    ArrayList<StoreItem> sorted = new ArrayList<>(items);
+    sorted.sort((item1, item2) -> item1.getClothes().compareTo(item2.getClothes()));
+    return sorted;
+    }
+
 
     /**
      * Пошук товарів за максимальною ціною.

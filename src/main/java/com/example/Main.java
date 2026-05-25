@@ -18,7 +18,7 @@ public class Main {
         boolean running = true;
         while (running) {
             printMenu();
-            int choice = readIntInput("Оберіть опцію: ");
+            int choice = readIntInput("Оберiть опцiю: ");
 
             switch (choice) {
                 case 1:
@@ -28,22 +28,28 @@ public class Main {
                     store.displayAllItems();
                     break;
                 case 3:
-                    searchMenu();
+                    updateItem();
                     break;
                 case 4:
-                    sortMenu();
+                    deleteItem();
                     break;
                 case 5:
-                    searchByUuid();
+                    searchMenu();
                     break;
                 case 6:
-                    System.out.println("Зберігаємо колекцію та завершуємо роботу...");
+                    sortMenu();
+                    break;
+                case 7:
+                    searchByUuid();
+                    break;
+                case 8:
+                    System.out.println("Зберiгаємо колекцiю та завершуємо роботу...");
                     saveToFile();
                     System.out.println("До побачення!");
                     running = false;
                     break;
                 default:
-                    System.out.println("❌ Некоректний вибір. Спробуйте ще раз.");
+                    System.out.println("Некоректний вибiр. Спробуйте ще раз.");
             }
         }
         scanner.close();
@@ -52,12 +58,199 @@ public class Main {
     private static void printMenu() {
         System.out.println("\n=== МЕНЮ ===");
         System.out.println("1. Додати новий товар");
-        System.out.println("2. Показати всі товари");
-        System.out.println("3. Пошук товарів");
-        System.out.println("4. Вивести відсортовану інформацію");
-        System.out.println("5. Пошук за UUID");
-        System.out.println("6. Завершити роботу (зберегти)");
+        System.out.println("2. Показати всi товари");
+        System.out.println("3. Модифiкувати товар");
+        System.out.println("4. Видалити товар");
+        System.out.println("5. Пошук товарiв");
+        System.out.println("6. Вивести вiдсортовану iнформацiю");
+        System.out.println("7. Пошук за UUID");
+        System.out.println("8. Завершити роботу (зберегти)");
         System.out.println(store);
+    }
+
+    private static void updateItem() {
+        if (store.getAllItems().isEmpty()) {
+            System.out.println("Магазин порожнiй. Немає що модифiкувати.");
+            return;
+        }
+
+        store.displayAllItems();
+        int index = readIntInput("Введiть номер товару для модифiкацiї: ");
+        ArrayList<StoreItem> items = store.getAllItems();
+        
+        if (index < 1 || index > items.size()) {
+            System.out.println("Некоректний номер товару.");
+            return;
+        }
+
+        Clothes oldItem = items.get(index - 1).getClothes();
+        
+        System.out.println("\n--- Модифiкацiя товару ---");
+        System.out.println("Поточнi данi: " + oldItem);
+        
+        System.out.println("Що бажаєте змiнити?");
+        System.out.println("1. Тип одягу");
+        System.out.println("2. Розмiр");
+        System.out.println("3. Цiну");
+        System.out.println("4. Бренд");
+        System.out.println("5. Матерiал");
+        System.out.println("0. Скасувати");
+        
+        int field = readIntInput("Ваш вибiр: ");
+        if (field == 0) return;
+        
+        Clothes newItem = null;
+        
+        try {
+            switch (field) {
+                case 1:
+                    String newType = readStringInput("Новий тип одягу: ");
+                    newItem = createCopyWithNewType(oldItem, newType);
+                    break;
+                case 2:
+                    Size newSize = readSizeFromUser();
+                    newItem = createCopyWithNewSize(oldItem, newSize);
+                    break;
+                case 3:
+                    double newPrice = readDoubleInput("Нова цiна: ");
+                    newItem = createCopyWithNewPrice(oldItem, newPrice);
+                    break;
+                case 4:
+                    String newBrand = readStringInput("Новий бренд: ");
+                    newItem = createCopyWithNewBrand(oldItem, newBrand);
+                    break;
+                case 5:
+                    Material newMaterial = readMaterialFromUser();
+                    newItem = createCopyWithNewMaterial(oldItem, newMaterial);
+                    break;
+                default:
+                    System.out.println("Некоректний вибiр.");
+                    return;
+            }
+            
+            if (newItem != null && store.update(oldItem, newItem)) {
+                System.out.println("Товар успiшно оновлено!");
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("Помилка: " + e.getMessage());
+        }
+    }
+
+    private static void deleteItem() {
+        if (store.getAllItems().isEmpty()) {
+            System.out.println("Магазин порожнiй. Немає що видаляти.");
+            return;
+        }
+
+        store.displayAllItems();
+        int index = readIntInput("Введiть номер товару для видалення: ");
+        ArrayList<StoreItem> items = store.getAllItems();
+        
+        if (index < 1 || index > items.size()) {
+            System.out.println("Некоректний номер товару.");
+            return;
+        }
+
+        Clothes itemToDelete = items.get(index - 1).getClothes();
+        
+        String confirm = readStringInput("Ви впевненi, що хочете видалити \"" + itemToDelete.getType() + "\"? (так/нi): ");
+        if (confirm.equalsIgnoreCase("так") || confirm.equalsIgnoreCase("yes") || confirm.equalsIgnoreCase("y")) {
+            if (store.delete(itemToDelete)) {
+                System.out.println("Товар успiшно видалено!");
+            }
+        } else {
+            System.out.println("Видалення скасовано.");
+        }
+    }
+
+    private static Clothes createCopyWithNewType(Clothes original, String newType) {
+        if (original instanceof Shirt) {
+            Shirt s = (Shirt) original;
+            return new Shirt(newType, s.getSize(), s.getPrice(), s.getBrand(), s.getMaterial(), s.isHasPocket(), s.getCollarType());
+        } else if (original instanceof Pants) {
+            Pants p = (Pants) original;
+            return new Pants(newType, p.getSize(), p.getPrice(), p.getBrand(), p.getMaterial(), p.getLength(), p.isHasSuspenders());
+        } else if (original instanceof Jacket) {
+            Jacket j = (Jacket) original;
+            return new Jacket(newType, j.getSize(), j.getPrice(), j.getBrand(), j.getMaterial(), j.isHasHood(), j.isWaterproof());
+        } else if (original instanceof Sweater) {
+            Sweater sw = (Sweater) original;
+            return new Sweater(newType, sw.getSize(), sw.getPrice(), sw.getBrand(), sw.getMaterial(), sw.isHasZip(), sw.getNeckType());
+        } else {
+            return new Clothes(newType, original.getSize(), original.getPrice(), original.getBrand(), original.getMaterial()) {};
+        }
+    }
+
+    private static Clothes createCopyWithNewSize(Clothes original, Size newSize) {
+        if (original instanceof Shirt) {
+            Shirt s = (Shirt) original;
+            return new Shirt(s.getType(), newSize, s.getPrice(), s.getBrand(), s.getMaterial(), s.isHasPocket(), s.getCollarType());
+        } else if (original instanceof Pants) {
+            Pants p = (Pants) original;
+            return new Pants(p.getType(), newSize, p.getPrice(), p.getBrand(), p.getMaterial(), p.getLength(), p.isHasSuspenders());
+        } else if (original instanceof Jacket) {
+            Jacket j = (Jacket) original;
+            return new Jacket(j.getType(), newSize, j.getPrice(), j.getBrand(), j.getMaterial(), j.isHasHood(), j.isWaterproof());
+        } else if (original instanceof Sweater) {
+            Sweater sw = (Sweater) original;
+            return new Sweater(sw.getType(), newSize, sw.getPrice(), sw.getBrand(), sw.getMaterial(), sw.isHasZip(), sw.getNeckType());
+        } else {
+            return new Clothes(original.getType(), newSize, original.getPrice(), original.getBrand(), original.getMaterial()) {};
+        }
+    }
+
+    private static Clothes createCopyWithNewPrice(Clothes original, double newPrice) {
+        if (original instanceof Shirt) {
+            Shirt s = (Shirt) original;
+            return new Shirt(s.getType(), s.getSize(), newPrice, s.getBrand(), s.getMaterial(), s.isHasPocket(), s.getCollarType());
+        } else if (original instanceof Pants) {
+            Pants p = (Pants) original;
+            return new Pants(p.getType(), p.getSize(), newPrice, p.getBrand(), p.getMaterial(), p.getLength(), p.isHasSuspenders());
+        } else if (original instanceof Jacket) {
+            Jacket j = (Jacket) original;
+            return new Jacket(j.getType(), j.getSize(), newPrice, j.getBrand(), j.getMaterial(), j.isHasHood(), j.isWaterproof());
+        } else if (original instanceof Sweater) {
+            Sweater sw = (Sweater) original;
+            return new Sweater(sw.getType(), sw.getSize(), newPrice, sw.getBrand(), sw.getMaterial(), sw.isHasZip(), sw.getNeckType());
+        } else {
+            return new Clothes(original.getType(), original.getSize(), newPrice, original.getBrand(), original.getMaterial()) {};
+        }
+    }
+
+    private static Clothes createCopyWithNewBrand(Clothes original, String newBrand) {
+        if (original instanceof Shirt) {
+            Shirt s = (Shirt) original;
+            return new Shirt(s.getType(), s.getSize(), s.getPrice(), newBrand, s.getMaterial(), s.isHasPocket(), s.getCollarType());
+        } else if (original instanceof Pants) {
+            Pants p = (Pants) original;
+            return new Pants(p.getType(), p.getSize(), p.getPrice(), newBrand, p.getMaterial(), p.getLength(), p.isHasSuspenders());
+        } else if (original instanceof Jacket) {
+            Jacket j = (Jacket) original;
+            return new Jacket(j.getType(), j.getSize(), j.getPrice(), newBrand, j.getMaterial(), j.isHasHood(), j.isWaterproof());
+        } else if (original instanceof Sweater) {
+            Sweater sw = (Sweater) original;
+            return new Sweater(sw.getType(), sw.getSize(), sw.getPrice(), newBrand, sw.getMaterial(), sw.isHasZip(), sw.getNeckType());
+        } else {
+            return new Clothes(original.getType(), original.getSize(), original.getPrice(), newBrand, original.getMaterial()) {};
+        }
+    }
+
+    private static Clothes createCopyWithNewMaterial(Clothes original, Material newMaterial) {
+        if (original instanceof Shirt) {
+            Shirt s = (Shirt) original;
+            return new Shirt(s.getType(), s.getSize(), s.getPrice(), s.getBrand(), newMaterial, s.isHasPocket(), s.getCollarType());
+        } else if (original instanceof Pants) {
+            Pants p = (Pants) original;
+            return new Pants(p.getType(), p.getSize(), p.getPrice(), p.getBrand(), newMaterial, p.getLength(), p.isHasSuspenders());
+        } else if (original instanceof Jacket) {
+            Jacket j = (Jacket) original;
+            return new Jacket(j.getType(), j.getSize(), j.getPrice(), j.getBrand(), newMaterial, j.isHasHood(), j.isWaterproof());
+        } else if (original instanceof Sweater) {
+            Sweater sw = (Sweater) original;
+            return new Sweater(sw.getType(), sw.getSize(), sw.getPrice(), sw.getBrand(), newMaterial, sw.isHasZip(), sw.getNeckType());
+        } else {
+            return new Clothes(original.getType(), original.getSize(), original.getPrice(), original.getBrand(), newMaterial) {};
+        }
     }
 
     private static void searchByUuid() {
@@ -66,29 +259,29 @@ public class Main {
             UUID uuid = UUID.fromString(uuidStr);
             StoreItem found = store.findByUuid(uuid);
             if (found != null) {
-                System.out.println("✅ Знайдено: " + found.getClothes());
-                System.out.println("Кількість: " + found.getQuantity());
+                System.out.println("Знайдено: " + found.getClothes());
+                System.out.println("Кiлькiсть: " + found.getQuantity());
             } else {
-                System.out.println("❌ Товар з UUID " + uuidStr + " не знайдено.");
+                System.out.println("Товар з UUID " + uuidStr + " не знайдено.");
             }
         } catch (IllegalArgumentException e) {
-            System.out.println("❌ Некоректний формат UUID: " + uuidStr);
+            System.out.println("Некоректний формат UUID: " + uuidStr);
         }
     }
 
     private static void sortMenu() {
         if (store.getAllItems().isEmpty()) {
-            System.out.println("📭 Гардероб порожній. Немає що сортувати.");
+            System.out.println("Магазин порожнiй. Немає що сортувати.");
             return;
         }
 
         System.out.println("\n=== ВИБІР КРИТЕРІЮ СОРТУВАННЯ ===");
-        System.out.println("1. Сортувати за типом одягу (алфавіт)");
-        System.out.println("2. Сортувати за ціною (від дешевших до дорожчих)");
-        System.out.println("3. Сортувати за брендом (алфавіт)");
+        System.out.println("1. Сортувати за типом одягу (алфавiт)");
+        System.out.println("2. Сортувати за цiною (вiд дешевших до дорожчих)");
+        System.out.println("3. Сортувати за брендом (алфавiт)");
         System.out.println("0. Повернутися до головного меню");
 
-        int choice = readIntInput("Ваш вибір: ");
+        int choice = readIntInput("Ваш вибiр: ");
         if (choice == 0) return;
 
         ArrayList<StoreItem> items = store.getAllItems();
@@ -96,22 +289,22 @@ public class Main {
         switch (choice) {
             case 1:
                 items.sort((o1, o2) -> o1.getClothes().getType().compareToIgnoreCase(o2.getClothes().getType()));
-                System.out.println("✅ Відсортовано за типом одягу");
+                System.out.println("Вiдсортовано за типом одягу");
                 break;
             case 2:
                 items.sort((o1, o2) -> Double.compare(o1.getClothes().getPrice(), o2.getClothes().getPrice()));
-                System.out.println("✅ Відсортовано за ціною (від дешевших до дорожчих)");
+                System.out.println("Вiдсортовано за цiною (вiд дешевших до дорожчих)");
                 break;
             case 3:
                 items.sort((o1, o2) -> o1.getClothes().getBrand().compareToIgnoreCase(o2.getClothes().getBrand()));
-                System.out.println("✅ Відсортовано за брендом");
+                System.out.println("Вiдсортовано за брендом");
                 break;
             default:
-                System.out.println("❌ Некоректний вибір.");
+                System.out.println("Некоректний вибiр.");
                 return;
         }
 
-        System.out.println("\n=== ВІДСОРТОВАНІ ТОВАРИ ===");
+        System.out.println("\n=== ВIДСОРТОВАНI ТОВАРИ ===");
         for (int i = 0; i < items.size(); i++) {
             System.out.println((i + 1) + ". " + items.get(i));
         }
@@ -120,14 +313,14 @@ public class Main {
     private static void loadFromFile() {
         ArrayList<Clothes> loaded = FileManager.loadFromFile();
         if (loaded.isEmpty()) {
-            System.out.println("ℹ️ Немає збережених товарів.");
+            System.out.println("Немає збережених товарiв.");
             return;
         }
 
         for (Clothes clothes : loaded) {
             store.addNewClothes(clothes, 1);
         }
-        System.out.println("📦 Завантажено " + loaded.size() + " товарів у магазин.");
+        System.out.println("Завантажено " + loaded.size() + " товарiв у магазин.");
     }
 
     private static void saveToFile() {
@@ -188,20 +381,20 @@ public class Main {
                     writer.println(item.getMaterial().name());
                 }
             }
-            System.out.println("✅ Колекцію збережено у файл: wardrobe.txt");
+            System.out.println("Колекцiю збережено у файл: wardrobe.txt");
         } catch (java.io.IOException e) {
-            System.out.println("❌ Помилка збереження: " + e.getMessage());
+            System.out.println("Помилка збереження: " + e.getMessage());
         }
     }
 
     private static void searchMenu() {
-        System.out.println("\n=== ПОШУК ТОВАРІВ ===");
+        System.out.println("\n=== ПОШУК ТОВАРIВ ===");
         System.out.println("1. Пошук за брендом");
-        System.out.println("2. Пошук за матеріалом");
-        System.out.println("3. Пошук за ціною (не більше заданої)");
+        System.out.println("2. Пошук за матерiалом");
+        System.out.println("3. Пошук за цiною (не бiльше заданої)");
         System.out.println("0. Повернутися до головного меню");
 
-        int choice = readIntInput("Ваш вибір: ");
+        int choice = readIntInput("Ваш вибiр: ");
         if (choice == 0) return;
 
         ArrayList<StoreItem> results = new ArrayList<>();
@@ -217,7 +410,7 @@ public class Main {
                 results = searchByMaxPrice();
                 break;
             default:
-                System.out.println("❌ Некоректний вибір.");
+                System.out.println("Некоректний вибiр.");
                 return;
         }
 
@@ -225,26 +418,26 @@ public class Main {
     }
 
     private static ArrayList<StoreItem> searchByBrand() {
-        String brand = readStringInput("Введіть бренд для пошуку: ");
+        String brand = readStringInput("Введiть бренд для пошуку: ");
         return store.searchByBrand(brand);
     }
 
     private static ArrayList<StoreItem> searchByMaterial() {
-        System.out.println("Доступні матеріали: COTTON, POLYESTER, WOOL, DENIM");
-        String materialName = readStringInput("Введіть матеріал для пошуку: ");
+        System.out.println("Доступнi матерiали: COTTON, POLYESTER, WOOL, DENIM");
+        String materialName = readStringInput("Введiть матерiал для пошуку: ");
         try {
             Material material = Material.fromString(materialName);
             return store.searchByMaterial(material);
         } catch (IllegalArgumentException e) {
-            System.out.println("❌ Невідомий матеріал: " + materialName);
+            System.out.println("Невiдомий матерiал: " + materialName);
             return new ArrayList<>();
         }
     }
 
     private static ArrayList<StoreItem> searchByMaxPrice() {
-        double maxPrice = readDoubleInput("Введіть максимальну ціну: ");
+        double maxPrice = readDoubleInput("Введiть максимальну цiну: ");
         if (maxPrice <= 0) {
-            System.out.println("❌ Ціна має бути додатною.");
+            System.out.println("Цiна має бути додатною.");
             return new ArrayList<>();
         }
         return store.searchByMaxPrice(maxPrice);
@@ -253,7 +446,7 @@ public class Main {
     private static void displaySearchResults(ArrayList<StoreItem> results) {
         System.out.println("\n=== РЕЗУЛЬТАТИ ПОШУКУ ===");
         if (results.isEmpty()) {
-            System.out.println("❌ Жоден товар не відповідає критерію пошуку.");
+            System.out.println("Жоден товар не вiдповiдає критерiю пошуку.");
         } else {
             System.out.println("Знайдено " + results.size() + " товар(ів):");
             for (int i = 0; i < results.size(); i++) {
@@ -263,7 +456,7 @@ public class Main {
     }
 
     private static void createNewItem() {
-        System.out.println("\n--- Виберіть тип товару ---");
+        System.out.println("\n--- Виберiть тип товару ---");
         System.out.println("1. Звичайний одяг (Clothes)");
         System.out.println("2. Сорочка (Shirt)");
         System.out.println("3. Штани (Pants)");
@@ -271,7 +464,7 @@ public class Main {
         System.out.println("5. Светр (Sweater)");
         System.out.println("0. Повернутися до головного меню");
 
-        int type = readIntInput("Ваш вибір: ");
+        int type = readIntInput("Ваш вибiр: ");
         if (type == 0) return;
 
         Clothes newItem = null;
@@ -293,12 +486,12 @@ public class Main {
                 newItem = createSweater();
                 break;
             default:
-                System.out.println("❌ Невідомий тип.");
+                System.out.println("Невiдомий тип.");
                 return;
         }
 
         if (newItem != null) {
-            int quantity = readIntInput("Введіть кількість: ");
+            int quantity = readIntInput("Введiть кiлькiсть: ");
             store.addNewClothes(newItem, quantity);
         }
     }
@@ -308,12 +501,12 @@ public class Main {
         try {
             String type = readStringInput("Тип одягу: ");
             Size size = readSizeFromUser();
-            double price = readDoubleInput("Ціна: ");
+            double price = readDoubleInput("Цiна: ");
             String brand = readStringInput("Бренд: ");
             Material material = readMaterialFromUser();
             return new Clothes(type, size, price, brand, material) {};
         } catch (IllegalArgumentException e) {
-            System.out.println("❌ Помилка: " + e.getMessage());
+            System.out.println("Помилка: " + e.getMessage());
             return null;
         }
     }
@@ -323,14 +516,14 @@ public class Main {
         try {
             String type = readStringInput("Тип сорочки: ");
             Size size = readSizeFromUser();
-            double price = readDoubleInput("Ціна: ");
+            double price = readDoubleInput("Цiна: ");
             String brand = readStringInput("Бренд: ");
             Material material = readMaterialFromUser();
-            boolean hasPocket = readBooleanInput("Наявність кишені (так/ні): ");
-            String collarType = readStringInput("Тип коміра: ");
+            boolean hasPocket = readBooleanInput("Наявнiсть кишенi (так/нi): ");
+            String collarType = readStringInput("Тип комiра: ");
             return new Shirt(type, size, price, brand, material, hasPocket, collarType);
         } catch (IllegalArgumentException e) {
-            System.out.println("❌ Помилка: " + e.getMessage());
+            System.out.println("Помилка: " + e.getMessage());
             return null;
         }
     }
@@ -340,14 +533,14 @@ public class Main {
         try {
             String type = readStringInput("Тип штанів: ");
             Size size = readSizeFromUser();
-            double price = readDoubleInput("Ціна: ");
+            double price = readDoubleInput("Цiна: ");
             String brand = readStringInput("Бренд: ");
             Material material = readMaterialFromUser();
             int length = readIntInput("Довжина штанів (30-120 см): ");
-            boolean hasSuspenders = readBooleanInput("Наявність підтяжок (так/ні): ");
+            boolean hasSuspenders = readBooleanInput("Наявнiсть пiдтяжок (так/нi): ");
             return new Pants(type, size, price, brand, material, length, hasSuspenders);
         } catch (IllegalArgumentException e) {
-            System.out.println("❌ Помилка: " + e.getMessage());
+            System.out.println("Помилка: " + e.getMessage());
             return null;
         }
     }
@@ -357,14 +550,14 @@ public class Main {
         try {
             String type = readStringInput("Тип куртки: ");
             Size size = readSizeFromUser();
-            double price = readDoubleInput("Ціна: ");
+            double price = readDoubleInput("Цiна: ");
             String brand = readStringInput("Бренд: ");
             Material material = readMaterialFromUser();
-            boolean hasHood = readBooleanInput("Наявність капюшона (так/ні): ");
-            boolean waterproof = readBooleanInput("Водонепроникна (так/ні): ");
+            boolean hasHood = readBooleanInput("Наявнiсть капюшона (так/нi): ");
+            boolean waterproof = readBooleanInput("Водонепроникна (так/нi): ");
             return new Jacket(type, size, price, brand, material, hasHood, waterproof);
         } catch (IllegalArgumentException e) {
-            System.out.println("❌ Помилка: " + e.getMessage());
+            System.out.println("Помилка: " + e.getMessage());
             return null;
         }
     }
@@ -374,14 +567,14 @@ public class Main {
         try {
             String type = readStringInput("Тип светра: ");
             Size size = readSizeFromUser();
-            double price = readDoubleInput("Ціна: ");
+            double price = readDoubleInput("Цiна: ");
             String brand = readStringInput("Бренд: ");
             Material material = readMaterialFromUser();
-            boolean hasZip = readBooleanInput("Наявність блискавки (так/ні): ");
+            boolean hasZip = readBooleanInput("Наявнiсть блискавки (так/нi): ");
             String neckType = readStringInput("Тип горловини: ");
             return new Sweater(type, size, price, brand, material, hasZip, neckType);
         } catch (IllegalArgumentException e) {
-            System.out.println("❌ Помилка: " + e.getMessage());
+            System.out.println("Помилка: " + e.getMessage());
             return null;
         }
     }
@@ -389,10 +582,10 @@ public class Main {
     private static Size readSizeFromUser() {
         while (true) {
             try {
-                String input = readStringInput("Розмір (S/M/L/XL): ");
+                String input = readStringInput("Розмiр (S/M/L/XL): ");
                 return Size.fromString(input);
             } catch (IllegalArgumentException e) {
-                System.out.println("❌ " + e.getMessage() + ". Спробуйте ще раз.");
+                System.out.println(e.getMessage() + ". Спробуйте ще раз.");
             }
         }
     }
@@ -400,10 +593,10 @@ public class Main {
     private static Material readMaterialFromUser() {
         while (true) {
             try {
-                String input = readStringInput("Матеріал (COTTON/POLYESTER/WOOL/DENIM): ");
+                String input = readStringInput("Матерiал (COTTON/POLYESTER/WOOL/DENIM): ");
                 return Material.fromString(input);
             } catch (IllegalArgumentException e) {
-                System.out.println("❌ " + e.getMessage() + ". Спробуйте ще раз.");
+                System.out.println(e.getMessage() + ". Спробуйте ще раз.");
             }
         }
     }
@@ -414,10 +607,10 @@ public class Main {
             if (input.equalsIgnoreCase("так") || input.equalsIgnoreCase("true") || input.equalsIgnoreCase("yes") || input.equalsIgnoreCase("y")) {
                 return true;
             }
-            if (input.equalsIgnoreCase("ні") || input.equalsIgnoreCase("false") || input.equalsIgnoreCase("no") || input.equalsIgnoreCase("n")) {
+            if (input.equalsIgnoreCase("нi") || input.equalsIgnoreCase("false") || input.equalsIgnoreCase("no") || input.equalsIgnoreCase("n")) {
                 return false;
             }
-            System.out.println("❌ Введіть 'так' або 'ні'");
+            System.out.println("Введiть 'так' або 'нi'");
         }
     }
 
@@ -427,7 +620,7 @@ public class Main {
                 System.out.print(prompt);
                 return scanner.nextInt();
             } catch (InputMismatchException e) {
-                System.out.println("❌ Помилка: введіть ціле число!");
+                System.out.println("Помилка: введiть цiле число!");
                 scanner.next();
             }
         }
@@ -439,7 +632,7 @@ public class Main {
                 System.out.print(prompt);
                 return scanner.nextDouble();
             } catch (InputMismatchException e) {
-                System.out.println("❌ Помилка: введіть число!");
+                System.out.println("Помилка: введiть число!");
                 scanner.next();
             }
         }

@@ -1,19 +1,22 @@
 package com.example;
 
+import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 /**
  * Драйвер програми.
- * Демонструє: статичний лічильник, конструктор копіювання, агрегацію, enum.
+ * Демонструє наслідування та поліморфізм:
+ * - Колекція ArrayList<Clothes> зберігає об'єкти Clothes, Shirt, Pants
+ * - Меню дозволяє створювати різні типи одягу
+ * - Поліморфний виклик toString() при виведенні
  */
 public class Main {
     private static final Scanner scanner = new Scanner(System.in);
-    private static Wardrobe wardrobe = null;
+    private static final ArrayList<Clothes> wardrobe = new ArrayList<>();
 
     public static void main(String[] args) {
-        System.out.println("=== Система управління гардеробом ===");
-        initWardrobe();
+        System.out.println("=== Система управління гардеробом (Наслідування та поліморфізм) ===");
 
         boolean running = true;
         while (running) {
@@ -22,16 +25,16 @@ public class Main {
 
             switch (choice) {
                 case 1:
-                    createAndAddClothes();
+                    createClothes();
                     break;
                 case 2:
-                    displayAllClothes();
+                    createShirt();
                     break;
                 case 3:
-                    displayStatistics();
+                    createPants();
                     break;
                 case 4:
-                    demonstrateCopyConstructor();
+                    displayAllItems();
                     break;
                 case 5:
                     System.out.println("До побачення!");
@@ -44,52 +47,88 @@ public class Main {
         scanner.close();
     }
 
-    private static void initWardrobe() {
-        int capacity = readIntInput("Введіть місткість шафи (1-20): ");
-        while (capacity < 1 || capacity > 20) {
-            System.out.println("❌ Місткість має бути від 1 до 20");
-            capacity = readIntInput("Введіть місткість шафи (1-20): ");
-        }
-        wardrobe = new Wardrobe(capacity);
-        System.out.println("✅ Шафу створено на " + capacity + " предметів");
-    }
-
     private static void printMenu() {
         System.out.println("\n=== МЕНЮ ===");
-        System.out.println("1. Додати новий одяг до шафи");
-        System.out.println("2. Показати весь одяг у шафі");
-        System.out.println("3. Статистика (всього створено, заповненість)");
-        System.out.println("4. Продемонструвати конструктор копіювання");
+        System.out.println("1. Додати звичайний одяг (Clothes)");
+        System.out.println("2. Додати сорочку (Shirt)");
+        System.out.println("3. Додати штани (Pants)");
+        System.out.println("4. Показати весь одяг у гардеробі");
         System.out.println("5. Завершити роботу");
+        System.out.println("Всього предметів: " + wardrobe.size());
     }
 
-    private static void createAndAddClothes() {
-        if (wardrobe.isFull()) {
-            System.out.println("❌ Шафа повна! Неможливо додати новий предмет.");
+    private static void createClothes() {
+        System.out.println("\n--- Створення звичайного одягу ---");
+        try {
+            String type = readStringInput("Тип одягу: ");
+            Size size = readSizeFromUser();
+            double price = readDoubleInput("Ціна: ");
+            String brand = readStringInput("Бренд: ");
+            Material material = readMaterialFromUser();
+
+            Clothes item = new Clothes(type, size, price, brand, material);
+            wardrobe.add(item);
+            System.out.println("✅ Одяг додано до гардеробу!");
+            System.out.println(item);
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ Помилка: " + e.getMessage());
+        }
+    }
+
+    private static void createShirt() {
+        System.out.println("\n--- Створення сорочки ---");
+        try {
+            String type = readStringInput("Тип сорочки: ");
+            Size size = readSizeFromUser();
+            double price = readDoubleInput("Ціна: ");
+            String brand = readStringInput("Бренд: ");
+            Material material = readMaterialFromUser();
+            boolean hasPocket = readBooleanInput("Наявність кишені (так/ні): ");
+            String collarType = readStringInput("Тип коміра (класичний/стійка/відкладний): ");
+
+            Shirt shirt = new Shirt(type, size, price, brand, material, hasPocket, collarType);
+            wardrobe.add(shirt);
+            System.out.println("✅ Сорочку додано до гардеробу!");
+            System.out.println(shirt);
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ Помилка: " + e.getMessage());
+        }
+    }
+
+    private static void createPants() {
+        System.out.println("\n--- Створення штанів ---");
+        try {
+            String type = readStringInput("Тип штанів: ");
+            Size size = readSizeFromUser();
+            double price = readDoubleInput("Ціна: ");
+            String brand = readStringInput("Бренд: ");
+            Material material = readMaterialFromUser();
+            int length = readIntInput("Довжина штанів (30-120 см): ");
+            boolean hasSuspenders = readBooleanInput("Наявність підтяжок (так/ні): ");
+
+            Pants pants = new Pants(type, size, price, brand, material, length, hasSuspenders);
+            wardrobe.add(pants);
+            System.out.println("✅ Штани додано до гардеробу!");
+            System.out.println(pants);
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ Помилка: " + e.getMessage());
+        }
+    }
+
+    private static void displayAllItems() {
+        if (wardrobe.isEmpty()) {
+            System.out.println("📭 Гардероб порожній.");
             return;
         }
 
-        System.out.println("\n--- Створення нового одягу ---");
-        System.out.println("Доступні розміри: S, M, L, XL");
-        System.out.println("Доступні матеріали: COTTON, POLYESTER, WOOL, DENIM");
-
-        String type = readStringInput("Тип одягу: ");
-        Size size = readSizeFromUser();
-        double price = readDoubleInput("Ціна: ");
-        String brand = readStringInput("Бренд: ");
-        Material material = readMaterialFromUser();
-
-        try {
-            Clothes item = new Clothes(type, size, price, brand, material);
-            if (wardrobe.addItem(item)) {
-                System.out.println("✅ Одяг успішно додано до шафи!");
-                System.out.println("Всього створено об'єктів Clothes: " + Clothes.getTotalCreated());
-                System.out.println(item);
-            }
-        } catch (IllegalArgumentException e) {
-            System.out.println("❌ Помилка створення: " + e.getMessage());
+        System.out.println("\n=== ВМІСТ ГАРДЕРОБУ ===");
+        for (int i = 0; i < wardrobe.size(); i++) {
+            Clothes item = wardrobe.get(i);
+            System.out.println((i + 1) + ". " + item);
         }
+        System.out.println("Всього предметів: " + wardrobe.size());
     }
+
 
     private static Size readSizeFromUser() {
         while (true) {
@@ -113,41 +152,17 @@ public class Main {
         }
     }
 
-    private static void displayAllClothes() {
-        if (wardrobe.isEmpty()) {
-            System.out.println("📭 Шафа порожня.");
-            return;
+    private static boolean readBooleanInput(String prompt) {
+        while (true) {
+            String input = readStringInput(prompt);
+            if (input.equalsIgnoreCase("так") || input.equalsIgnoreCase("true") || input.equalsIgnoreCase("yes") || input.equalsIgnoreCase("y")) {
+                return true;
+            }
+            if (input.equalsIgnoreCase("ні") || input.equalsIgnoreCase("false") || input.equalsIgnoreCase("no") || input.equalsIgnoreCase("n")) {
+                return false;
+            }
+            System.out.println("❌ Введіть 'так' або 'ні'");
         }
-
-        System.out.println("\n=== Вміст шафи ===");
-        Clothes[] items = wardrobe.getAllItems();
-        for (int i = 0; i < items.length; i++) {
-            System.out.println((i + 1) + ". " + items[i]);
-        }
-        System.out.println("Заповнено: " + wardrobe.getCount() + "/" + wardrobe.getCapacity());
-    }
-
-    private static void displayStatistics() {
-        System.out.println("\n=== СТАТИСТИКА ===");
-        System.out.println("Всього створено об'єктів Clothes: " + Clothes.getTotalCreated());
-        System.out.println("Поточна шафа: " + wardrobe.getCount() + "/" + wardrobe.getCapacity());
-        System.out.println("Шафа заповнена: " + (wardrobe.isFull() ? "Так" : "Ні"));
-    }
-
-    private static void demonstrateCopyConstructor() {
-        if (wardrobe.isEmpty()) {
-            System.out.println("📭 Шафа порожня. Додайте хоча б один одяг перед демонстрацією.");
-            return;
-        }
-
-        Clothes original = wardrobe.getItem(0);
-        Clothes copy = new Clothes(original);
-
-        System.out.println("\n=== Демонстрація конструктора копіювання ===");
-        System.out.println("Оригінал: " + original);
-        System.out.println("Копія:    " + copy);
-        System.out.println("Копія є окремим об'єктом: " + (original != copy));
-        System.out.println("Але вміст однаковий: " + original.equals(copy));
     }
 
     private static int readIntInput(String prompt) {
@@ -162,11 +177,6 @@ public class Main {
         }
     }
 
-    private static String readStringInput(String prompt) {
-        System.out.print(prompt);
-        return scanner.next().trim();
-    }
-
     private static double readDoubleInput(String prompt) {
         while (true) {
             try {
@@ -177,5 +187,10 @@ public class Main {
                 scanner.next();
             }
         }
+    }
+
+    private static String readStringInput(String prompt) {
+        System.out.print(prompt);
+        return scanner.next().trim();
     }
 }

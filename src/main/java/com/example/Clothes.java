@@ -84,4 +84,7 @@ public class Clothes {
     public int hashCode() {
         return Objects.hash(type, size, price, brand, material);
     }
+    public String getClassType() {
+    return this.getClass().getSimpleName();
+    }
 }

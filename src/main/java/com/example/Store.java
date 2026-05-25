@@ -28,10 +28,10 @@ public class Store {
 
     public void addNewClothes(Clothes clothes, int quantity) {
         if (clothes == null) {
-            throw new IllegalArgumentException("Одяг не може бути null");
+            throw new InvalidFieldValueException("Одяг не може бути null");
         }
         if (quantity <= 0) {
-            throw new IllegalArgumentException("Кількість має бути більшою за 0");
+            throw new InvalidFieldValueException("Кількість має бути більшою за 0");
         }
 
         for (StoreItem item : items) {
@@ -46,30 +46,28 @@ public class Store {
         System.out.println("Додано новий товар: " + clothes.getType());
     }
 
-    public boolean update(Clothes existingObject, Clothes newObject) {
+    public void update(Clothes existingObject, Clothes newObject) throws ObjectNotFoundException {
         for (int i = 0; i < items.size(); i++) {
             StoreItem item = items.get(i);
             if (item.getClothes().equals(existingObject)) {
                 items.set(i, new StoreItem(newObject, item.getQuantity()));
                 System.out.println("Оновлено товар: " + existingObject.getType() + " -> " + newObject.getType());
-                return true;
+                return;
             }
         }
-        System.out.println("Товар не знайдено для оновлення");
-        return false;
+        throw new ObjectNotFoundException("Товар не знайдено для оновлення: " + existingObject.getType());
     }
 
-    public boolean delete(Clothes existingObject) {
+    public void delete(Clothes existingObject) throws ObjectNotFoundException {
         for (int i = 0; i < items.size(); i++) {
             StoreItem item = items.get(i);
             if (item.getClothes().equals(existingObject)) {
                 items.remove(i);
                 System.out.println("Видалено товар: " + existingObject.getType());
-                return true;
+                return;
             }
         }
-        System.out.println("Товар не знайдено для видалення");
-        return false;
+        throw new ObjectNotFoundException("Товар не знайдено для видалення: " + existingObject.getType());
     }
 
     public StoreItem findByUuid(UUID uuid) {

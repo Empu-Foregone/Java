@@ -2,7 +2,7 @@ package com.example;
 
 import java.util.Objects;
 
-public class Clothes {
+public abstract class Clothes implements Comparable<Clothes> {
     protected String type;
     protected Size size;
     protected double price;
@@ -62,6 +62,15 @@ public class Clothes {
         this.material = material;
     }
 
+    public String getClassType() {
+        return this.getClass().getSimpleName();
+    }
+
+    @Override
+    public int compareTo(Clothes other) {
+        return this.type.compareToIgnoreCase(other.type);
+    }
+
     @Override
     public String toString() {
         return String.format("[Одяг] %s, бренд: %s, розмір: %s, матеріал: %s, ціна: %.2f грн",
@@ -83,8 +92,5 @@ public class Clothes {
     @Override
     public int hashCode() {
         return Objects.hash(type, size, price, brand, material);
-    }
-    public String getClassType() {
-    return this.getClass().getSimpleName();
     }
 }

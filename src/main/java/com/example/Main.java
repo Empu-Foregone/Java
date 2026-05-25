@@ -3,13 +3,14 @@ package com.example;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.util.UUID;
 
 public class Main {
     private static final Scanner scanner = new Scanner(System.in);
     private static Store store;
 
     public static void main(String[] args) {
-        System.out.println("=== Система управління магазином одягу (Lambda Edition) ===");
+        System.out.println("=== Система управління магазином одягу ===");
 
         store = new Store("Clothes Paradise", "вул. Хрещатик, 15");
         loadFromFile();
@@ -33,13 +34,13 @@ public class Main {
                     sortMenu();
                     break;
                 case 5:
+                    searchByUuid();
+                    break;
+                case 6:
                     System.out.println("Зберігаємо колекцію та завершуємо роботу...");
                     saveToFile();
                     System.out.println("До побачення!");
                     running = false;
-                    break;
-                case 6:
-                    searchByUuid();
                     break;
                 default:
                     System.out.println("❌ Некоректний вибір. Спробуйте ще раз.");
@@ -54,9 +55,25 @@ public class Main {
         System.out.println("2. Показати всі товари");
         System.out.println("3. Пошук товарів");
         System.out.println("4. Вивести відсортовану інформацію");
-        System.out.println("5. Завершити роботу (зберегти)");
-        System.out.println("6. Пошук товару за UUID");
+        System.out.println("5. Пошук за UUID");
+        System.out.println("6. Завершити роботу (зберегти)");
         System.out.println(store);
+    }
+
+    private static void searchByUuid() {
+        String uuidStr = readStringInput("Введіть UUID для пошуку: ");
+        try {
+            UUID uuid = UUID.fromString(uuidStr);
+            StoreItem found = store.findByUuid(uuid);
+            if (found != null) {
+                System.out.println("✅ Знайдено: " + found.getClothes());
+                System.out.println("Кількість: " + found.getQuantity());
+            } else {
+                System.out.println("❌ Товар з UUID " + uuidStr + " не знайдено.");
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ Некоректний формат UUID: " + uuidStr);
+        }
     }
 
     private static void sortMenu() {
@@ -78,13 +95,16 @@ public class Main {
         
         switch (choice) {
             case 1:
-                sortByType(items);
+                items.sort((o1, o2) -> o1.getClothes().getType().compareToIgnoreCase(o2.getClothes().getType()));
+                System.out.println("✅ Відсортовано за типом одягу");
                 break;
             case 2:
-                sortByPrice(items);
+                items.sort((o1, o2) -> Double.compare(o1.getClothes().getPrice(), o2.getClothes().getPrice()));
+                System.out.println("✅ Відсортовано за ціною (від дешевших до дорожчих)");
                 break;
             case 3:
-                sortByBrand(items);
+                items.sort((o1, o2) -> o1.getClothes().getBrand().compareToIgnoreCase(o2.getClothes().getBrand()));
+                System.out.println("✅ Відсортовано за брендом");
                 break;
             default:
                 System.out.println("❌ Некоректний вибір.");
@@ -95,21 +115,6 @@ public class Main {
         for (int i = 0; i < items.size(); i++) {
             System.out.println((i + 1) + ". " + items.get(i));
         }
-    }
-
-    private static void sortByType(ArrayList<StoreItem> items) {
-        items.sort((o1, o2) -> o1.getClothes().getType().compareToIgnoreCase(o2.getClothes().getType()));
-        System.out.println("✅ Відсортовано за типом одягу");
-    }
-
-    private static void sortByPrice(ArrayList<StoreItem> items) {
-        items.sort((o1, o2) -> Double.compare(o1.getClothes().getPrice(), o2.getClothes().getPrice()));
-        System.out.println("✅ Відсортовано за ціною (від дешевших до дорожчих)");
-    }
-
-    private static void sortByBrand(ArrayList<StoreItem> items) {
-        items.sort((o1, o2) -> o1.getClothes().getBrand().compareToIgnoreCase(o2.getClothes().getBrand()));
-        System.out.println("✅ Відсортовано за брендом");
     }
 
     private static void loadFromFile() {
@@ -312,22 +317,6 @@ public class Main {
             return null;
         }
     }
-
-    private static void searchByUuid() {
-    String uuidStr = readStringInput("Введіть UUID для пошуку: ");
-    try {
-        UUID uuid = UUID.fromString(uuidStr);
-        StoreItem found = store.findByUuid(uuid);
-        if (found != null) {
-            System.out.println("✅ Знайдено: " + found.getClothes());
-            System.out.println("Кількість: " + found.getQuantity());
-        } else {
-            System.out.println("❌ Товар з UUID " + uuidStr + " не знайдено.");
-        }
-    } catch (IllegalArgumentException e) {
-        System.out.println("❌ Некоректний формат UUID: " + uuidStr);
-    }
-}
 
     private static Clothes createShirt() {
         System.out.println("\n--- Створення сорочки ---");

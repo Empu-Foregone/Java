@@ -1,11 +1,8 @@
 package com.example;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
-/**
- * Клас-контейнер для зберігання товарів у магазині.
- * Агрегує колекцію StoreItem та забезпечує операції додавання та пошуку.
- */
 public class Store {
     private ArrayList<StoreItem> items;
     private String storeName;
@@ -17,26 +14,9 @@ public class Store {
         this.items = new ArrayList<>();
     }
 
-    public StoreItem findByUuid(UUID uuid) {
-    for (StoreItem item : items) {
-        if (item.getClothes().getUuid().equals(uuid)) {
-            return item;
-        }
-    }
-    return null;
-    }
-
-    public String getStoreName() {
-        return storeName;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public int getTotalItems() {
-        return items.size();
-    }
+    public String getStoreName() { return storeName; }
+    public String getAddress() { return address; }
+    public int getTotalItems() { return items.size(); }
 
     public int getTotalQuantity() {
         int total = 0;
@@ -46,12 +26,6 @@ public class Store {
         return total;
     }
 
-    /**
-     * Додає одяг до магазину з вказаною кількістю.
-     * Якщо такий самий одяг вже існує, кількість збільшується.
-     * @param clothes одяг для додавання
-     * @param quantity кількість
-     */
     public void addNewClothes(Clothes clothes, int quantity) {
         if (clothes == null) {
             throw new IllegalArgumentException("Одяг не може бути null");
@@ -72,11 +46,15 @@ public class Store {
         System.out.println("✅ Додано новий товар: " + clothes.getType());
     }
 
-    /**
-     * Пошук товарів за брендом.
-     * @param brand бренд для пошуку
-     * @return список StoreItem, що відповідають критерію
-     */
+    public StoreItem findByUuid(UUID uuid) {
+        for (StoreItem item : items) {
+            if (item.getClothes().getUuid().equals(uuid)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
     public ArrayList<StoreItem> searchByBrand(String brand) {
         ArrayList<StoreItem> results = new ArrayList<>();
         for (StoreItem item : items) {
@@ -87,11 +65,6 @@ public class Store {
         return results;
     }
 
-    /**
-     * Пошук товарів за матеріалом.
-     * @param material матеріал для пошуку
-     * @return список StoreItem, що відповідають критерію
-     */
     public ArrayList<StoreItem> searchByMaterial(Material material) {
         ArrayList<StoreItem> results = new ArrayList<>();
         for (StoreItem item : items) {
@@ -101,22 +74,7 @@ public class Store {
         }
         return results;
     }
-   /**
-    * Повертає відсортований список усіх товарів (за типом одягу).
-    * @return відсортований ArrayList товарів
-    */
-    public ArrayList<StoreItem> getSortedItems() {
-    ArrayList<StoreItem> sorted = new ArrayList<>(items);
-    sorted.sort((item1, item2) -> item1.getClothes().compareTo(item2.getClothes()));
-    return sorted;
-    }
 
-
-    /**
-     * Пошук товарів за максимальною ціною.
-     * @param maxPrice максимальна ціна
-     * @return список StoreItem, що відповідають критерію
-     */
     public ArrayList<StoreItem> searchByMaxPrice(double maxPrice) {
         ArrayList<StoreItem> results = new ArrayList<>();
         for (StoreItem item : items) {
@@ -127,16 +85,10 @@ public class Store {
         return results;
     }
 
-    /**
-     * Повертає всі товари в магазині.
-     */
     public ArrayList<StoreItem> getAllItems() {
         return new ArrayList<>(items);
     }
 
-    /**
-     * Виводить інформацію про всі товари в магазині.
-     */
     public void displayAllItems() {
         if (items.isEmpty()) {
             System.out.println("📭 Магазин порожній.");

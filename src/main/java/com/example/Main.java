@@ -12,7 +12,6 @@ public class Main {
         System.out.println("=== Система управління магазином одягу ===");
 
         store = new Store("Clothes Paradise", "вул. Хрещатик, 15");
-
         loadFromFile();
 
         boolean running = true;
@@ -31,6 +30,9 @@ public class Main {
                     searchMenu();
                     break;
                 case 4:
+                    displaySortedItems();
+                    break;
+                case 5:
                     System.out.println("Зберігаємо колекцію та завершуємо роботу...");
                     saveToFile();
                     System.out.println("До побачення!");
@@ -48,8 +50,24 @@ public class Main {
         System.out.println("1. Додати новий товар");
         System.out.println("2. Показати всі товари");
         System.out.println("3. Пошук товарів");
-        System.out.println("4. Завершити роботу (зберегти)");
+        System.out.println("4. Вивести відсортовану інформацію (за типом)");
+        System.out.println("5. Завершити роботу (зберегти)");
         System.out.println(store);
+    }
+
+    private static void displaySortedItems() {
+        ArrayList<StoreItem> sorted = store.getSortedItems();
+        
+        if (sorted.isEmpty()) {
+            System.out.println("📭 Гардероб порожній. Немає що сортувати.");
+            return;
+        }
+
+        System.out.println("\n=== ВІДСОРТОВАНІ ТОВАРИ (за типом) ===");
+        for (int i = 0; i < sorted.size(); i++) {
+            System.out.println((i + 1) + ". " + sorted.get(i));
+        }
+        System.out.println("Всього найменувань: " + sorted.size());
     }
 
 
@@ -69,16 +87,14 @@ public class Main {
     private static void saveToFile() {
         ArrayList<Clothes> toSave = new ArrayList<>();
         for (StoreItem item : store.getAllItems()) {
-            // Зберігаємо кожен товар стільки разів, яка кількість
             for (int i = 0; i < item.getQuantity(); i++) {
                 toSave.add(item.getClothes());
             }
         }
-        
+        saveToFileDirect(toSave);
     }
 
     private static void saveToFileDirect(ArrayList<Clothes> wardrobe) {
-        // Тимчасове рішення: використовуємо PrintWriter
         try (java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter("wardrobe.txt"))) {
             for (Clothes item : wardrobe) {
                 writer.println(item.getClass().getSimpleName());
@@ -251,7 +267,7 @@ public class Main {
             double price = readDoubleInput("Ціна: ");
             String brand = readStringInput("Бренд: ");
             Material material = readMaterialFromUser();
-            return new Clothes(type, size, price, brand, material);
+            return new Clothes(type, size, price, brand, material) {};
         } catch (IllegalArgumentException e) {
             System.out.println("❌ Помилка: " + e.getMessage());
             return null;

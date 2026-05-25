@@ -1,6 +1,8 @@
 package com.example;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -30,7 +32,7 @@ public class Main {
                     searchMenu();
                     break;
                 case 4:
-                    displaySortedItems();
+                    sortMenu();
                     break;
                 case 5:
                     System.out.println("Зберігаємо колекцію та завершуємо роботу...");
@@ -50,24 +52,91 @@ public class Main {
         System.out.println("1. Додати новий товар");
         System.out.println("2. Показати всі товари");
         System.out.println("3. Пошук товарів");
-        System.out.println("4. Вивести відсортовану інформацію (за типом)");
+        System.out.println("4. Вивести відсортовану інформацію");
         System.out.println("5. Завершити роботу (зберегти)");
         System.out.println(store);
     }
 
-    private static void displaySortedItems() {
-        ArrayList<StoreItem> sorted = store.getSortedItems();
-        
-        if (sorted.isEmpty()) {
+    private static void sortMenu() {
+        if (store.getAllItems().isEmpty()) {
             System.out.println("📭 Гардероб порожній. Немає що сортувати.");
             return;
         }
 
-        System.out.println("\n=== ВІДСОРТОВАНІ ТОВАРИ (за типом) ===");
-        for (int i = 0; i < sorted.size(); i++) {
-            System.out.println((i + 1) + ". " + sorted.get(i));
+        System.out.println("\n=== ВИБІР КРИТЕРІЮ СОРТУВАННЯ ===");
+        System.out.println("1. Сортувати за типом одягу (алфавіт)");
+        System.out.println("2. Сортувати за ціною (від дешевших до дорожчих)");
+        System.out.println("3. Сортувати за брендом (алфавіт)");
+        System.out.println("0. Повернутися до головного меню");
+
+        int choice = readIntInput("Ваш вибір: ");
+        if (choice == 0) return;
+
+        ArrayList<StoreItem> items = store.getAllItems();
+        
+        switch (choice) {
+            case 1:
+                sortByType(items);
+                break;
+            case 2:
+                sortByPrice(items);
+                break;
+            case 3:
+                sortByBrand(items);
+                break;
+            default:
+                System.out.println("❌ Некоректний вибір.");
+                return;
         }
-        System.out.println("Всього найменувань: " + sorted.size());
+
+        // Виведення відсортованого результату
+        System.out.println("\n=== ВІДСОРТОВАНІ ТОВАРИ ===");
+        for (int i = 0; i < items.size(); i++) {
+            System.out.println((i + 1) + ". " + items.get(i));
+        }
+    }
+
+
+    /**
+     * Сортування за типом одягу (алфавітний порядок)
+     */
+    private static void sortByType(ArrayList<StoreItem> items) {
+        Comparator<StoreItem> typeComparator = new Comparator<StoreItem>() {
+            @Override
+            public int compare(StoreItem o1, StoreItem o2) {
+                return o1.getClothes().getType().compareToIgnoreCase(o2.getClothes().getType());
+            }
+        };
+        items.sort(typeComparator);
+        System.out.println("✅ Відсортовано за типом одягу");
+    }
+
+    /**
+     * Сортування за ціною (від дешевших до дорожчих)
+     */
+    private static void sortByPrice(ArrayList<StoreItem> items) {
+        Comparator<StoreItem> priceComparator = new Comparator<StoreItem>() {
+            @Override
+            public int compare(StoreItem o1, StoreItem o2) {
+                return Double.compare(o1.getClothes().getPrice(), o2.getClothes().getPrice());
+            }
+        };
+        items.sort(priceComparator);
+        System.out.println("✅ Відсортовано за ціною (від дешевших до дорожчих)");
+    }
+
+    /**
+     * Сортування за брендом (алфавітний порядок)
+     */
+    private static void sortByBrand(ArrayList<StoreItem> items) {
+        Comparator<StoreItem> brandComparator = new Comparator<StoreItem>() {
+            @Override
+            public int compare(StoreItem o1, StoreItem o2) {
+                return o1.getClothes().getBrand().compareToIgnoreCase(o2.getClothes().getBrand());
+            }
+        };
+        items.sort(brandComparator);
+        System.out.println("✅ Відсортовано за брендом");
     }
 
 
@@ -98,13 +167,7 @@ public class Main {
         try (java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter("wardrobe.txt"))) {
             for (Clothes item : wardrobe) {
                 writer.println(item.getClass().getSimpleName());
-                if (item instanceof Clothes && !(item instanceof Shirt) && !(item instanceof Pants) && !(item instanceof Jacket) && !(item instanceof Sweater)) {
-                    writer.println(item.getType());
-                    writer.println(item.getSize().name());
-                    writer.println(item.getPrice());
-                    writer.println(item.getBrand());
-                    writer.println(item.getMaterial().name());
-                } else if (item instanceof Shirt) {
+                if (item instanceof Shirt) {
                     Shirt shirt = (Shirt) item;
                     writer.println(shirt.getType());
                     writer.println(shirt.getSize().name());
@@ -140,6 +203,12 @@ public class Main {
                     writer.println(sweater.getMaterial().name());
                     writer.println(sweater.isHasZip());
                     writer.println(sweater.getNeckType());
+                } else {
+                    writer.println(item.getType());
+                    writer.println(item.getSize().name());
+                    writer.println(item.getPrice());
+                    writer.println(item.getBrand());
+                    writer.println(item.getMaterial().name());
                 }
             }
             System.out.println("✅ Колекцію збережено у файл: wardrobe.txt");

@@ -38,35 +38,35 @@ public abstract class Clothes implements Comparable<Clothes>, Identifiable {
 
     public void setType(String type) {
         if (type == null || type.trim().isEmpty()) {
-            throw new IllegalArgumentException("Тип одягу не може бути порожнім");
+            throw new InvalidFieldValueException("Тип одягу не може бути порожнiм");
         }
         this.type = type.trim();
     }
 
     public void setSize(Size size) {
         if (size == null) {
-            throw new IllegalArgumentException("Розмір не може бути null");
+            throw new InvalidFieldValueException("Розмiр не може бути null");
         }
         this.size = size;
     }
 
     public void setPrice(double price) {
         if (price <= 0) {
-            throw new IllegalArgumentException("Ціна має бути більшою за 0");
+            throw new InvalidFieldValueException("Цiна має бути бiльшою за 0");
         }
         this.price = price;
     }
 
     public void setBrand(String brand) {
         if (brand == null || brand.trim().isEmpty()) {
-            throw new IllegalArgumentException("Бренд не може бути порожнім");
+            throw new InvalidFieldValueException("Бренд не може бути порожнiм");
         }
         this.brand = brand.trim();
     }
 
     public void setMaterial(Material material) {
         if (material == null) {
-            throw new IllegalArgumentException("Матеріал не може бути null");
+            throw new InvalidFieldValueException("Матерiал не може бути null");
         }
         this.material = material;
     }
@@ -86,7 +86,7 @@ public abstract class Clothes implements Comparable<Clothes>, Identifiable {
 
     @Override
     public String toString() {
-        return String.format("[%s] %s, бренд: %s, розмір: %s, матеріал: %s, ціна: %.2f грн, UUID: %s",
+        return String.format("[%s] %s, бренд: %s, розмiр: %s, матерiал: %s, цiна: %.2f грн, UUID: %s",
                 this.getClass().getSimpleName(), type, brand, size.name(), material.getUkrainianName(), price, uuid.toString());
     }
 

@@ -6,10 +6,13 @@ import java.util.Scanner;
 
 public class Main {
     private static final Scanner scanner = new Scanner(System.in);
-    private static final ArrayList<Clothes> wardrobe = new ArrayList<>();
+    private static ArrayList<Clothes> wardrobe;
 
     public static void main(String[] args) {
-        System.out.println("=== Система управління гардеробом (Розширена ієрархія) ===");
+        System.out.println("=== Система управління гардеробом (з файловим збереженням) ===");
+
+        // Завантаження з файлу
+        wardrobe = FileManager.loadFromFile();
 
         boolean running = true;
         while (running) {
@@ -24,6 +27,8 @@ public class Main {
                     displayAllItems();
                     break;
                 case 3:
+                    System.out.println("Зберігаємо колекцію та завершуємо роботу...");
+                    FileManager.saveToFile(wardrobe);
                     System.out.println("До побачення!");
                     running = false;
                     break;
@@ -38,7 +43,7 @@ public class Main {
         System.out.println("\n=== МЕНЮ ===");
         System.out.println("1. Створити новий об'єкт");
         System.out.println("2. Вивести інформацію про всі об'єкти");
-        System.out.println("3. Завершити роботу");
+        System.out.println("3. Завершити роботу (зберегти)");
         System.out.println("Всього предметів: " + wardrobe.size());
     }
 

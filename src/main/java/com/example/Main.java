@@ -128,9 +128,14 @@ public class Main {
                     return;
             }
             
-            if (newItem != null && store.update(oldItem, newItem)) {
+            if (newItem != null) {
+                store.update(oldItem, newItem);
                 System.out.println("Товар успiшно оновлено!");
             }
+        } catch (InvalidFieldValueException e) {
+            System.out.println("Помилка валiдацiї: " + e.getMessage());
+        } catch (ObjectNotFoundException e) {
+            System.out.println("Помилка: " + e.getMessage());
         } catch (IllegalArgumentException e) {
             System.out.println("Помилка: " + e.getMessage());
         }
@@ -155,11 +160,64 @@ public class Main {
         
         String confirm = readStringInput("Ви впевненi, що хочете видалити \"" + itemToDelete.getType() + "\"? (так/нi): ");
         if (confirm.equalsIgnoreCase("так") || confirm.equalsIgnoreCase("yes") || confirm.equalsIgnoreCase("y")) {
-            if (store.delete(itemToDelete)) {
+            try {
+                store.delete(itemToDelete);
                 System.out.println("Товар успiшно видалено!");
+            } catch (ObjectNotFoundException e) {
+                System.out.println("Помилка: " + e.getMessage());
             }
         } else {
             System.out.println("Видалення скасовано.");
+        }
+    }
+
+    private static void createNewItem() {
+        System.out.println("\n--- Виберiть тип товару ---");
+        System.out.println("1. Звичайний одяг (Clothes)");
+        System.out.println("2. Сорочка (Shirt)");
+        System.out.println("3. Штани (Pants)");
+        System.out.println("4. Куртка (Jacket)");
+        System.out.println("5. Светр (Sweater)");
+        System.out.println("0. Повернутися до головного меню");
+
+        int type = readIntInput("Ваш вибiр: ");
+        if (type == 0) return;
+
+        Clothes newItem = null;
+
+        try {
+            switch (type) {
+                case 1:
+                    newItem = createClothes();
+                    break;
+                case 2:
+                    newItem = createShirt();
+                    break;
+                case 3:
+                    newItem = createPants();
+                    break;
+                case 4:
+                    newItem = createJacket();
+                    break;
+                case 5:
+                    newItem = createSweater();
+                    break;
+                default:
+                    System.out.println("Невiдомий тип.");
+                    return;
+            }
+        } catch (InvalidFieldValueException e) {
+            System.out.println("Помилка: " + e.getMessage());
+            return;
+        }
+
+        if (newItem != null) {
+            int quantity = readIntInput("Введiть кiлькiсть: ");
+            try {
+                store.addNewClothes(newItem, quantity);
+            } catch (InvalidFieldValueException e) {
+                System.out.println("Помилка: " + e.getMessage());
+            }
         }
     }
 
@@ -318,7 +376,11 @@ public class Main {
         }
 
         for (Clothes clothes : loaded) {
-            store.addNewClothes(clothes, 1);
+            try {
+                store.addNewClothes(clothes, 1);
+            } catch (InvalidFieldValueException e) {
+                System.out.println("Помилка завантаження: " + e.getMessage());
+            }
         }
         System.out.println("Завантажено " + loaded.size() + " товарiв у магазин.");
     }
@@ -455,128 +517,62 @@ public class Main {
         }
     }
 
-    private static void createNewItem() {
-        System.out.println("\n--- Виберiть тип товару ---");
-        System.out.println("1. Звичайний одяг (Clothes)");
-        System.out.println("2. Сорочка (Shirt)");
-        System.out.println("3. Штани (Pants)");
-        System.out.println("4. Куртка (Jacket)");
-        System.out.println("5. Светр (Sweater)");
-        System.out.println("0. Повернутися до головного меню");
-
-        int type = readIntInput("Ваш вибiр: ");
-        if (type == 0) return;
-
-        Clothes newItem = null;
-
-        switch (type) {
-            case 1:
-                newItem = createClothes();
-                break;
-            case 2:
-                newItem = createShirt();
-                break;
-            case 3:
-                newItem = createPants();
-                break;
-            case 4:
-                newItem = createJacket();
-                break;
-            case 5:
-                newItem = createSweater();
-                break;
-            default:
-                System.out.println("Невiдомий тип.");
-                return;
-        }
-
-        if (newItem != null) {
-            int quantity = readIntInput("Введiть кiлькiсть: ");
-            store.addNewClothes(newItem, quantity);
-        }
-    }
-
     private static Clothes createClothes() {
         System.out.println("\n--- Створення звичайного одягу ---");
-        try {
-            String type = readStringInput("Тип одягу: ");
-            Size size = readSizeFromUser();
-            double price = readDoubleInput("Цiна: ");
-            String brand = readStringInput("Бренд: ");
-            Material material = readMaterialFromUser();
-            return new Clothes(type, size, price, brand, material) {};
-        } catch (IllegalArgumentException e) {
-            System.out.println("Помилка: " + e.getMessage());
-            return null;
-        }
+        String type = readStringInput("Тип одягу: ");
+        Size size = readSizeFromUser();
+        double price = readDoubleInput("Цiна: ");
+        String brand = readStringInput("Бренд: ");
+        Material material = readMaterialFromUser();
+        return new Clothes(type, size, price, brand, material) {};
     }
 
     private static Clothes createShirt() {
         System.out.println("\n--- Створення сорочки ---");
-        try {
-            String type = readStringInput("Тип сорочки: ");
-            Size size = readSizeFromUser();
-            double price = readDoubleInput("Цiна: ");
-            String brand = readStringInput("Бренд: ");
-            Material material = readMaterialFromUser();
-            boolean hasPocket = readBooleanInput("Наявнiсть кишенi (так/нi): ");
-            String collarType = readStringInput("Тип комiра: ");
-            return new Shirt(type, size, price, brand, material, hasPocket, collarType);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Помилка: " + e.getMessage());
-            return null;
-        }
+        String type = readStringInput("Тип сорочки: ");
+        Size size = readSizeFromUser();
+        double price = readDoubleInput("Цiна: ");
+        String brand = readStringInput("Бренд: ");
+        Material material = readMaterialFromUser();
+        boolean hasPocket = readBooleanInput("Наявнiсть кишенi (так/нi): ");
+        String collarType = readStringInput("Тип комiра: ");
+        return new Shirt(type, size, price, brand, material, hasPocket, collarType);
     }
 
     private static Clothes createPants() {
         System.out.println("\n--- Створення штанів ---");
-        try {
-            String type = readStringInput("Тип штанів: ");
-            Size size = readSizeFromUser();
-            double price = readDoubleInput("Цiна: ");
-            String brand = readStringInput("Бренд: ");
-            Material material = readMaterialFromUser();
-            int length = readIntInput("Довжина штанів (30-120 см): ");
-            boolean hasSuspenders = readBooleanInput("Наявнiсть пiдтяжок (так/нi): ");
-            return new Pants(type, size, price, brand, material, length, hasSuspenders);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Помилка: " + e.getMessage());
-            return null;
-        }
+        String type = readStringInput("Тип штанів: ");
+        Size size = readSizeFromUser();
+        double price = readDoubleInput("Цiна: ");
+        String brand = readStringInput("Бренд: ");
+        Material material = readMaterialFromUser();
+        int length = readIntInput("Довжина штанів (30-120 см): ");
+        boolean hasSuspenders = readBooleanInput("Наявнiсть пiдтяжок (так/нi): ");
+        return new Pants(type, size, price, brand, material, length, hasSuspenders);
     }
 
     private static Clothes createJacket() {
         System.out.println("\n--- Створення куртки ---");
-        try {
-            String type = readStringInput("Тип куртки: ");
-            Size size = readSizeFromUser();
-            double price = readDoubleInput("Цiна: ");
-            String brand = readStringInput("Бренд: ");
-            Material material = readMaterialFromUser();
-            boolean hasHood = readBooleanInput("Наявнiсть капюшона (так/нi): ");
-            boolean waterproof = readBooleanInput("Водонепроникна (так/нi): ");
-            return new Jacket(type, size, price, brand, material, hasHood, waterproof);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Помилка: " + e.getMessage());
-            return null;
-        }
+        String type = readStringInput("Тип куртки: ");
+        Size size = readSizeFromUser();
+        double price = readDoubleInput("Цiна: ");
+        String brand = readStringInput("Бренд: ");
+        Material material = readMaterialFromUser();
+        boolean hasHood = readBooleanInput("Наявнiсть капюшона (так/нi): ");
+        boolean waterproof = readBooleanInput("Водонепроникна (так/нi): ");
+        return new Jacket(type, size, price, brand, material, hasHood, waterproof);
     }
 
     private static Clothes createSweater() {
         System.out.println("\n--- Створення светра ---");
-        try {
-            String type = readStringInput("Тип светра: ");
-            Size size = readSizeFromUser();
-            double price = readDoubleInput("Цiна: ");
-            String brand = readStringInput("Бренд: ");
-            Material material = readMaterialFromUser();
-            boolean hasZip = readBooleanInput("Наявнiсть блискавки (так/нi): ");
-            String neckType = readStringInput("Тип горловини: ");
-            return new Sweater(type, size, price, brand, material, hasZip, neckType);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Помилка: " + e.getMessage());
-            return null;
-        }
+        String type = readStringInput("Тип светра: ");
+        Size size = readSizeFromUser();
+        double price = readDoubleInput("Цiна: ");
+        String brand = readStringInput("Бренд: ");
+        Material material = readMaterialFromUser();
+        boolean hasZip = readBooleanInput("Наявнiсть блискавки (так/нi): ");
+        String neckType = readStringInput("Тип горловини: ");
+        return new Sweater(type, size, price, brand, material, hasZip, neckType);
     }
 
     private static Size readSizeFromUser() {

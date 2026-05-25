@@ -9,9 +9,8 @@ public class Main {
     private static ArrayList<Clothes> wardrobe;
 
     public static void main(String[] args) {
-        System.out.println("=== Система управління гардеробом (з файловим збереженням) ===");
+        System.out.println("=== Система управління гардеробом (з пошуком) ===");
 
-        // Завантаження з файлу
         wardrobe = FileManager.loadFromFile();
 
         boolean running = true;
@@ -27,6 +26,9 @@ public class Main {
                     displayAllItems();
                     break;
                 case 3:
+                    searchMenu();
+                    break;
+                case 4:
                     System.out.println("Зберігаємо колекцію та завершуємо роботу...");
                     FileManager.saveToFile(wardrobe);
                     System.out.println("До побачення!");
@@ -43,9 +45,133 @@ public class Main {
         System.out.println("\n=== МЕНЮ ===");
         System.out.println("1. Створити новий об'єкт");
         System.out.println("2. Вивести інформацію про всі об'єкти");
-        System.out.println("3. Завершити роботу (зберегти)");
+        System.out.println("3. Пошук об'єкта");
+        System.out.println("4. Завершити роботу (зберегти)");
         System.out.println("Всього предметів: " + wardrobe.size());
     }
+
+
+    private static void searchMenu() {
+        System.out.println("\n=== ПОШУК ОБ'ЄКТІВ ===");
+        System.out.println("1. Пошук за брендом");
+        System.out.println("2. Пошук за матеріалом");
+        System.out.println("3. Пошук за ціною (не більше заданої)");
+        System.out.println("0. Повернутися до головного меню");
+
+        int choice = readIntInput("Ваш вибір: ");
+        if (choice == 0) return;
+
+        switch (choice) {
+            case 1:
+                searchByBrand();
+                break;
+            case 2:
+                searchByMaterial();
+                break;
+            case 3:
+                searchByMaxPrice();
+                break;
+            default:
+                System.out.println("❌ Некоректний вибір.");
+        }
+    }
+
+
+    /**
+     * Пошук об'єктів за брендом (точний збіг, нечутливий до регістру).
+     */
+    private static void searchByBrand() {
+        if (wardrobe.isEmpty()) {
+            System.out.println("📭 Гардероб порожній. Немає що шукати.");
+            return;
+        }
+
+        String brand = readStringInput("Введіть бренд для пошуку: ");
+        ArrayList<Clothes> results = new ArrayList<>();
+
+        for (Clothes item : wardrobe) {
+            if (item.getBrand().equalsIgnoreCase(brand)) {
+                results.add(item);
+            }
+        }
+
+        displaySearchResults(results, "брендом \"" + brand + "\"");
+    }
+
+    /**
+     * Пошук об'єктів за матеріалом (точний збіг).
+     */
+    private static void searchByMaterial() {
+        if (wardrobe.isEmpty()) {
+            System.out.println("📭 Гардероб порожній. Немає що шукати.");
+            return;
+        }
+
+        System.out.println("Доступні матеріали: COTTON, POLYESTER, WOOL, DENIM");
+        String materialName = readStringInput("Введіть матеріал для пошуку: ");
+        
+        Material material;
+        try {
+            material = Material.fromString(materialName);
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ Невідомий матеріал: " + materialName);
+            return;
+        }
+
+        ArrayList<Clothes> results = new ArrayList<>();
+        for (Clothes item : wardrobe) {
+            if (item.getMaterial() == material) {
+                results.add(item);
+            }
+        }
+
+        displaySearchResults(results, "матеріалом \"" + material.getUkrainianName() + "\"");
+    }
+
+    /**
+     * Пошук об'єктів за ціною (ціна <= заданої).
+     */
+    private static void searchByMaxPrice() {
+        if (wardrobe.isEmpty()) {
+            System.out.println("📭 Гардероб порожній. Немає що шукати.");
+            return;
+        }
+
+        double maxPrice = readDoubleInput("Введіть максимальну ціну: ");
+        if (maxPrice <= 0) {
+            System.out.println("❌ Ціна має бути додатною.");
+            return;
+        }
+
+        ArrayList<Clothes> results = new ArrayList<>();
+        for (Clothes item : wardrobe) {
+            if (item.getPrice() <= maxPrice) {
+                results.add(item);
+            }
+        }
+
+        displaySearchResults(results, "ціною не більше " + maxPrice + " грн");
+    }
+
+    /**
+     * Виводить результати пошуку.
+     * @param results знайдені об'єкти
+     * @param criterion опис критерію для виведення
+     */
+    private static void displaySearchResults(ArrayList<Clothes> results, String criterion) {
+        System.out.println("\n=== РЕЗУЛЬТАТИ ПОШУКУ ===");
+        System.out.println("Критерій: " + criterion);
+        
+        if (results.isEmpty()) {
+            System.out.println("❌ Жоден об'єкт не відповідає критерію пошуку.");
+        } else {
+            System.out.println("Знайдено " + results.size() + " об'єкт(ів):");
+            for (int i = 0; i < results.size(); i++) {
+                System.out.println((i + 1) + ". " + results.get(i));
+            }
+        }
+    }
+
 
     private static void createNewItem() {
         System.out.println("\n--- Виберіть тип об'єкта ---");
@@ -191,6 +317,7 @@ public class Main {
         }
         System.out.println("Всього предметів: " + wardrobe.size());
     }
+
 
     private static Size readSizeFromUser() {
         while (true) {

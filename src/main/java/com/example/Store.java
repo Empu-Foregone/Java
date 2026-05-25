@@ -37,13 +37,39 @@ public class Store {
         for (StoreItem item : items) {
             if (item.getClothes().equals(clothes)) {
                 item.addQuantity(quantity);
-                System.out.println("✅ Оновлено кількість для: " + clothes.getType());
+                System.out.println("Оновлено кількість для: " + clothes.getType());
                 return;
             }
         }
 
         items.add(new StoreItem(clothes, quantity));
-        System.out.println("✅ Додано новий товар: " + clothes.getType());
+        System.out.println("Додано новий товар: " + clothes.getType());
+    }
+
+    public boolean update(Clothes existingObject, Clothes newObject) {
+        for (int i = 0; i < items.size(); i++) {
+            StoreItem item = items.get(i);
+            if (item.getClothes().equals(existingObject)) {
+                items.set(i, new StoreItem(newObject, item.getQuantity()));
+                System.out.println("Оновлено товар: " + existingObject.getType() + " -> " + newObject.getType());
+                return true;
+            }
+        }
+        System.out.println("Товар не знайдено для оновлення");
+        return false;
+    }
+
+    public boolean delete(Clothes existingObject) {
+        for (int i = 0; i < items.size(); i++) {
+            StoreItem item = items.get(i);
+            if (item.getClothes().equals(existingObject)) {
+                items.remove(i);
+                System.out.println("Видалено товар: " + existingObject.getType());
+                return true;
+            }
+        }
+        System.out.println("Товар не знайдено для видалення");
+        return false;
     }
 
     public StoreItem findByUuid(UUID uuid) {
@@ -91,17 +117,17 @@ public class Store {
 
     public void displayAllItems() {
         if (items.isEmpty()) {
-            System.out.println("📭 Магазин порожній.");
+            System.out.println("Магазин порожнiй.");
             return;
         }
 
-        System.out.println("\n=== ТОВАРИ В МАГАЗИНІ ===");
+        System.out.println("\n=== ТОВАРИ В МАГАЗИНI ===");
         System.out.println("Магазин: " + storeName + ", Адреса: " + address);
         for (int i = 0; i < items.size(); i++) {
             System.out.println((i + 1) + ". " + items.get(i));
         }
         System.out.println("Всього найменувань: " + items.size());
-        System.out.println("Загальна кількість одиниць: " + getTotalQuantity());
+        System.out.println("Загальна кiлькiсть одиниць: " + getTotalQuantity());
     }
 
     @Override

@@ -17,6 +17,15 @@ public class Store {
         this.items = new ArrayList<>();
     }
 
+    public StoreItem findByUuid(UUID uuid) {
+    for (StoreItem item : items) {
+        if (item.getClothes().getUuid().equals(uuid)) {
+            return item;
+        }
+    }
+    return null;
+    }
+
     public String getStoreName() {
         return storeName;
     }

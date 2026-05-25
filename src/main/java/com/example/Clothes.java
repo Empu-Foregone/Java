@@ -1,15 +1,18 @@
 package com.example;
 
 import java.util.Objects;
+import java.util.UUID;
 
-public abstract class Clothes implements Comparable<Clothes> {
+public abstract class Clothes implements Comparable<Clothes>, Identifiable {
     protected String type;
     protected Size size;
     protected double price;
     protected String brand;
     protected Material material;
+    protected UUID uuid;
 
     public Clothes(String type, Size size, double price, String brand, Material material) {
+        this.uuid = UUID.randomUUID();
         setType(type);
         setSize(size);
         setPrice(price);
@@ -18,7 +21,12 @@ public abstract class Clothes implements Comparable<Clothes> {
     }
 
     public Clothes(Clothes other) {
-        this(other.type, other.size, other.price, other.brand, other.material);
+        this.uuid = UUID.randomUUID();
+        this.type = other.type;
+        this.size = other.size;
+        this.price = other.price;
+        this.brand = other.brand;
+        this.material = other.material;
     }
 
     public String getType() { return type; }
@@ -26,6 +34,7 @@ public abstract class Clothes implements Comparable<Clothes> {
     public double getPrice() { return price; }
     public String getBrand() { return brand; }
     public Material getMaterial() { return material; }
+    public UUID getUuid() { return uuid; }
 
     public void setType(String type) {
         if (type == null || type.trim().isEmpty()) {
@@ -66,6 +75,10 @@ public abstract class Clothes implements Comparable<Clothes> {
         return this.getClass().getSimpleName();
     }
 
+    public String getShortInfo() {
+        return type + " (" + brand + ") | UUID: " + uuid.toString().substring(0, 8) + "...";
+    }
+
     @Override
     public int compareTo(Clothes other) {
         return this.type.compareToIgnoreCase(other.type);
@@ -73,8 +86,8 @@ public abstract class Clothes implements Comparable<Clothes> {
 
     @Override
     public String toString() {
-        return String.format("[Одяг] %s, бренд: %s, розмір: %s, матеріал: %s, ціна: %.2f грн",
-                type, brand, size.name(), material.getUkrainianName(), price);
+        return String.format("[%s] %s, бренд: %s, розмір: %s, матеріал: %s, ціна: %.2f грн, UUID: %s",
+                this.getClass().getSimpleName(), type, brand, size.name(), material.getUkrainianName(), price, uuid.toString());
     }
 
     @Override

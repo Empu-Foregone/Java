@@ -38,6 +38,9 @@ public class Main {
                     System.out.println("До побачення!");
                     running = false;
                     break;
+                case 6:
+                    searchByUuid();
+                    break;
                 default:
                     System.out.println("❌ Некоректний вибір. Спробуйте ще раз.");
             }
@@ -52,6 +55,7 @@ public class Main {
         System.out.println("3. Пошук товарів");
         System.out.println("4. Вивести відсортовану інформацію");
         System.out.println("5. Завершити роботу (зберегти)");
+        System.out.println("6. Пошук товару за UUID");
         System.out.println(store);
     }
 
@@ -308,6 +312,22 @@ public class Main {
             return null;
         }
     }
+
+    private static void searchByUuid() {
+    String uuidStr = readStringInput("Введіть UUID для пошуку: ");
+    try {
+        UUID uuid = UUID.fromString(uuidStr);
+        StoreItem found = store.findByUuid(uuid);
+        if (found != null) {
+            System.out.println("✅ Знайдено: " + found.getClothes());
+            System.out.println("Кількість: " + found.getQuantity());
+        } else {
+            System.out.println("❌ Товар з UUID " + uuidStr + " не знайдено.");
+        }
+    } catch (IllegalArgumentException e) {
+        System.out.println("❌ Некоректний формат UUID: " + uuidStr);
+    }
+}
 
     private static Clothes createShirt() {
         System.out.println("\n--- Створення сорочки ---");

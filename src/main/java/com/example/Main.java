@@ -1,8 +1,6 @@
 package com.example;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -11,7 +9,7 @@ public class Main {
     private static Store store;
 
     public static void main(String[] args) {
-        System.out.println("=== Система управління магазином одягу ===");
+        System.out.println("=== Система управління магазином одягу (Lambda Edition) ===");
 
         store = new Store("Clothes Paradise", "вул. Хрещатик, 15");
         loadFromFile();
@@ -89,56 +87,26 @@ public class Main {
                 return;
         }
 
-        // Виведення відсортованого результату
         System.out.println("\n=== ВІДСОРТОВАНІ ТОВАРИ ===");
         for (int i = 0; i < items.size(); i++) {
             System.out.println((i + 1) + ". " + items.get(i));
         }
     }
 
-
-    /**
-     * Сортування за типом одягу (алфавітний порядок)
-     */
     private static void sortByType(ArrayList<StoreItem> items) {
-        Comparator<StoreItem> typeComparator = new Comparator<StoreItem>() {
-            @Override
-            public int compare(StoreItem o1, StoreItem o2) {
-                return o1.getClothes().getType().compareToIgnoreCase(o2.getClothes().getType());
-            }
-        };
-        items.sort(typeComparator);
+        items.sort((o1, o2) -> o1.getClothes().getType().compareToIgnoreCase(o2.getClothes().getType()));
         System.out.println("✅ Відсортовано за типом одягу");
     }
 
-    /**
-     * Сортування за ціною (від дешевших до дорожчих)
-     */
     private static void sortByPrice(ArrayList<StoreItem> items) {
-        Comparator<StoreItem> priceComparator = new Comparator<StoreItem>() {
-            @Override
-            public int compare(StoreItem o1, StoreItem o2) {
-                return Double.compare(o1.getClothes().getPrice(), o2.getClothes().getPrice());
-            }
-        };
-        items.sort(priceComparator);
+        items.sort((o1, o2) -> Double.compare(o1.getClothes().getPrice(), o2.getClothes().getPrice()));
         System.out.println("✅ Відсортовано за ціною (від дешевших до дорожчих)");
     }
 
-    /**
-     * Сортування за брендом (алфавітний порядок)
-     */
     private static void sortByBrand(ArrayList<StoreItem> items) {
-        Comparator<StoreItem> brandComparator = new Comparator<StoreItem>() {
-            @Override
-            public int compare(StoreItem o1, StoreItem o2) {
-                return o1.getClothes().getBrand().compareToIgnoreCase(o2.getClothes().getBrand());
-            }
-        };
-        items.sort(brandComparator);
+        items.sort((o1, o2) -> o1.getClothes().getBrand().compareToIgnoreCase(o2.getClothes().getBrand()));
         System.out.println("✅ Відсортовано за брендом");
     }
-
 
     private static void loadFromFile() {
         ArrayList<Clothes> loaded = FileManager.loadFromFile();
@@ -217,7 +185,6 @@ public class Main {
         }
     }
 
-
     private static void searchMenu() {
         System.out.println("\n=== ПОШУК ТОВАРІВ ===");
         System.out.println("1. Пошук за брендом");
@@ -285,7 +252,6 @@ public class Main {
             }
         }
     }
-
 
     private static void createNewItem() {
         System.out.println("\n--- Виберіть тип товару ---");
@@ -410,7 +376,6 @@ public class Main {
             return null;
         }
     }
-
 
     private static Size readSizeFromUser() {
         while (true) {

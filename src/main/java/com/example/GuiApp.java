@@ -1,13 +1,13 @@
 package com.example;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.util.UUID;
@@ -126,7 +126,10 @@ public class GuiApp extends Application {
                 }
                 store.addNewClothes(clothes, 1);
                 updateListView();
-                clearFields(typeField, priceField, brandField, extraField);
+                typeField.clear();
+                priceField.clear();
+                brandField.clear();
+                extraField.clear();
                 typeCombo.setValue("Clothes");
                 sizeCombo.setValue(Size.M);
                 materialCombo.setValue(Material.COTTON);
@@ -171,12 +174,6 @@ public class GuiApp extends Application {
         itemsList.clear();
         for (StoreItem item : store.getAllItems()) {
             itemsList.add(item.getClothes().getShortInfo() + " [x" + item.getQuantity() + "]");
-        }
-    }
-
-    private void clearFields(TextField... fields) {
-        for (TextField field : fields) {
-            field.clear();
         }
     }
 

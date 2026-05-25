@@ -4,19 +4,12 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-/**
- * Драйвер програми.
- * Демонструє наслідування та поліморфізм:
- * - Колекція ArrayList<Clothes> зберігає об'єкти Clothes, Shirt, Pants
- * - Меню дозволяє створювати різні типи одягу
- * - Поліморфний виклик toString() при виведенні
- */
 public class Main {
     private static final Scanner scanner = new Scanner(System.in);
     private static final ArrayList<Clothes> wardrobe = new ArrayList<>();
 
     public static void main(String[] args) {
-        System.out.println("=== Система управління гардеробом (Наслідування та поліморфізм) ===");
+        System.out.println("=== Система управління гардеробом (Розширена ієрархія) ===");
 
         boolean running = true;
         while (running) {
@@ -25,18 +18,12 @@ public class Main {
 
             switch (choice) {
                 case 1:
-                    createClothes();
+                    createNewItem();
                     break;
                 case 2:
-                    createShirt();
-                    break;
-                case 3:
-                    createPants();
-                    break;
-                case 4:
                     displayAllItems();
                     break;
-                case 5:
+                case 3:
                     System.out.println("До побачення!");
                     running = false;
                     break;
@@ -49,12 +36,43 @@ public class Main {
 
     private static void printMenu() {
         System.out.println("\n=== МЕНЮ ===");
-        System.out.println("1. Додати звичайний одяг (Clothes)");
-        System.out.println("2. Додати сорочку (Shirt)");
-        System.out.println("3. Додати штани (Pants)");
-        System.out.println("4. Показати весь одяг у гардеробі");
-        System.out.println("5. Завершити роботу");
+        System.out.println("1. Створити новий об'єкт");
+        System.out.println("2. Вивести інформацію про всі об'єкти");
+        System.out.println("3. Завершити роботу");
         System.out.println("Всього предметів: " + wardrobe.size());
+    }
+
+    private static void createNewItem() {
+        System.out.println("\n--- Виберіть тип об'єкта ---");
+        System.out.println("1. Звичайний одяг (Clothes)");
+        System.out.println("2. Сорочка (Shirt)");
+        System.out.println("3. Штани (Pants)");
+        System.out.println("4. Куртка (Jacket)");
+        System.out.println("5. Светр (Sweater)");
+        System.out.println("0. Повернутися до головного меню");
+
+        int type = readIntInput("Ваш вибір: ");
+        if (type == 0) return;
+
+        switch (type) {
+            case 1:
+                createClothes();
+                break;
+            case 2:
+                createShirt();
+                break;
+            case 3:
+                createPants();
+                break;
+            case 4:
+                createJacket();
+                break;
+            case 5:
+                createSweater();
+                break;
+            default:
+                System.out.println("❌ Невідомий тип. Спробуйте ще раз.");
+        }
     }
 
     private static void createClothes() {
@@ -84,7 +102,7 @@ public class Main {
             String brand = readStringInput("Бренд: ");
             Material material = readMaterialFromUser();
             boolean hasPocket = readBooleanInput("Наявність кишені (так/ні): ");
-            String collarType = readStringInput("Тип коміра (класичний/стійка/відкладний): ");
+            String collarType = readStringInput("Тип коміра: ");
 
             Shirt shirt = new Shirt(type, size, price, brand, material, hasPocket, collarType);
             wardrobe.add(shirt);
@@ -115,6 +133,47 @@ public class Main {
         }
     }
 
+    private static void createJacket() {
+        System.out.println("\n--- Створення куртки ---");
+        try {
+            String type = readStringInput("Тип куртки: ");
+            Size size = readSizeFromUser();
+            double price = readDoubleInput("Ціна: ");
+            String brand = readStringInput("Бренд: ");
+            Material material = readMaterialFromUser();
+            boolean hasHood = readBooleanInput("Наявність капюшона (так/ні): ");
+            boolean waterproof = readBooleanInput("Водонепроникна (так/ні): ");
+
+            Jacket jacket = new Jacket(type, size, price, brand, material, hasHood, waterproof);
+            wardrobe.add(jacket);
+            System.out.println("✅ Куртку додано до гардеробу!");
+            System.out.println(jacket);
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ Помилка: " + e.getMessage());
+        }
+    }
+
+    private static void createSweater() {
+        System.out.println("\n--- Створення светра ---");
+        try {
+            String type = readStringInput("Тип светра: ");
+            Size size = readSizeFromUser();
+            double price = readDoubleInput("Ціна: ");
+            String brand = readStringInput("Бренд: ");
+            Material material = readMaterialFromUser();
+            boolean hasZip = readBooleanInput("Наявність блискавки (так/ні): ");
+            String neckType = readStringInput("Тип горловини (круглий/човник/стійка): ");
+
+            Sweater sweater = new Sweater(type, size, price, brand, material, hasZip, neckType);
+            wardrobe.add(sweater);
+            System.out.println("✅ Светр додано до гардеробу!");
+            System.out.println(sweater);
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ Помилка: " + e.getMessage());
+        }
+    }
+
+
     private static void displayAllItems() {
         if (wardrobe.isEmpty()) {
             System.out.println("📭 Гардероб порожній.");
@@ -123,12 +182,10 @@ public class Main {
 
         System.out.println("\n=== ВМІСТ ГАРДЕРОБУ ===");
         for (int i = 0; i < wardrobe.size(); i++) {
-            Clothes item = wardrobe.get(i);
-            System.out.println((i + 1) + ". " + item);
+            System.out.println((i + 1) + ". " + wardrobe.get(i));
         }
         System.out.println("Всього предметів: " + wardrobe.size());
     }
-
 
     private static Size readSizeFromUser() {
         while (true) {
